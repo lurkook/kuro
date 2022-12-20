@@ -10,11 +10,11 @@ UbiArt texture encoder for Wii games.
 ### Features
 - Masked texture support
 - Command line interface
+- Batch convert support
 - Minimal dependencies to external programs *(program is needs only Wiimm Image Tool for encoding textures)*
 - Powered by PIL library *(this helps to make real alpha images for masked textures)*
 
 ### TODO
-- [ ] Batch convert support
 - [ ] Move to custom CMPR encoding from Wiimm Image Tool
 - [ ] Test output textures in Rayman games
 

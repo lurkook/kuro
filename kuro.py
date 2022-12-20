@@ -14,6 +14,8 @@ parser.add_argument("-w", "--wimgt-executable-path",
                     default="wimgt.exe", help="Path to Wiimms Image Tool")
 parser.add_argument("-m", "--masked", action="store_true",
                     help="Texture should be masked?")
+parser.add_argument("-e", "--extension-name", default="tga",
+                    help="Name of extension what should be used for output file names (example. tga/png)")
 
 
 # PIL saves PNGs with sRGB profile what makes Wiimm Image Tool crash
@@ -123,9 +125,7 @@ def convert(input_file, output_file, args, masked):
 
     # Checks the image size
     if w % 2 != 0 or h % 2 != 0:
-        print(
-            "Bad image input. Width and height should be width and height with a power of 2")
-        sys.exit(-1)
+        raise Exception("Bad image input. Width and height should be width and height with a power of 2")
 
     # Writing the UbiArt texture container header
     header_buf = io.BytesIO()
@@ -174,10 +174,15 @@ def main():
     input_files = glob(args.input)
     masked = args.masked
 
+    if args.extension_name not in ['tga', 'png']:
+        print(f"Unknown extension: {args.extension_name}")
+        os.exit(-1)
+
     # Converting the files
     for input_file in input_files:
         # Getting the output path
-        output_file = os.path.splitext(input_file)[0] + ".tga.ckd"
+        output_file = os.path.splitext(
+            input_file)[0] + f".{args.extension_name}.ckd"
         output_file = os.path.join(
             args.output if args.output else '', output_file)
 

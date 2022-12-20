@@ -16,10 +16,9 @@ UbiArt texture encoder for Wii games.
 
 ### Usage
 ```
-kuro.py [-h] -i INPUT [-o OUTPUT] [-w WIMGT_EXECUTABLE_PATH] [-m]
+kuro.py -i INPUT [-o OUTPUT] [-w WIMGT_EXECUTABLE_PATH] [-m]
 
 optional arguments:
-  -h, --help            show this help message and exit
   -i INPUT, --input INPUT
                         Input image(s)
   -o OUTPUT, --output OUTPUT

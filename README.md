@@ -18,15 +18,19 @@ UbiArt texture encoder for Wii games.
 - [ ] Move to custom CMPR encoding from Wiimm Image Tool
 - [ ] Test output textures in Rayman games
 
-### Command-line parameters
+### Usage
 ```
--i INPUT, --input INPUT
-                        Input image
--o OUTPUT, --output OUTPUT
-                        Output texture
--w WIMGT_EXECUTABLE_PATH, --wimgt-executable-path WIMGT_EXECUTABLE_PATH
+kuro.py [-h] -i INPUT [-o OUTPUT] [-w WIMGT_EXECUTABLE_PATH] [-m]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT, --input INPUT
+                        Input image(s)
+  -o OUTPUT, --output OUTPUT
+                        Output directory
+  -w WIMGT_EXECUTABLE_PATH, --wimgt-executable-path WIMGT_EXECUTABLE_PATH
                         Path to Wiimms Image Tool
--m, --masked            Texture should be masked?
+  -m, --masked          Texture should be masked?
 ```
 
 ### Contribute!

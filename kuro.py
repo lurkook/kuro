@@ -111,6 +111,7 @@ def build_1txd(writer_io, img, args):
     os.remove(destination_texture)
 
 
+# Main function
 def main():
     # Parse the command line arguments
     args = parser.parse_args()
@@ -173,5 +174,7 @@ def main():
         os.rmdir("temp")
 
 
+# If current name of script is __main__,
+# program execute main function
 if __name__ == "__main__":
     main()

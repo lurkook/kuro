@@ -16,6 +16,7 @@ UbiArt texture encoder for Wii games.
 ### TODO
 - [ ] Batch convert support
 - [ ] Move to custom CMPR encoding from Wiimm Image Tool
+- [ ] Test output textures in Rayman games
 
 ### Command-line parameters
 ```

@@ -1,4 +1,5 @@
 from PIL import Image, ImageCms
+from glob import glob
 import struct
 import os
 import io
@@ -7,8 +8,8 @@ import sys
 
 parser = argparse.ArgumentParser(description="UbiArt Wii texture encoder")
 
-parser.add_argument("-i", "--input", help="Input image", required=True)
-parser.add_argument("-o", "--output", help="Output texture")
+parser.add_argument("-i", "--input", help="Input image(s)", required=True)
+parser.add_argument("-o", "--output", help="Output directory")
 parser.add_argument("-w", "--wimgt-executable-path",
                     default="wimgt.exe", help="Path to Wiimms Image Tool")
 parser.add_argument("-m", "--masked", action="store_true",
@@ -19,16 +20,19 @@ parser.add_argument("-m", "--masked", action="store_true",
 # I used code from https://github.com/python-pillow/Pillow/issues/6467
 # to create this function
 def safe_save(img, output_path):
-    # Getting current image profile and creating the clean sRGB profile
-    profile = img.info["icc_profile"]
+    # Creating the clean sRGB image
     srgb_profile = ImageCms.createProfile("sRGB")
 
-    # Converting input image from original profile to clean sRGB profile
-    safe_img = ImageCms.profileToProfile(
-        img, io.BytesIO(profile), srgb_profile)
+    if img.info.get("icc_profile", None):
+        # Getting current image profile
+        profile = img.info["icc_profile"]
+
+        # Converting input image from original profile to clean sRGB profile
+        img = ImageCms.profileToProfile(
+            img, io.BytesIO(profile), srgb_profile)
 
     # Save .PNG image with clean sRGB profile
-    safe_img.save(output_path, icc_profile=ImageCms.ImageCmsProfile(
+    img.save(output_path, icc_profile=ImageCms.ImageCmsProfile(
         srgb_profile).tobytes(), format="png")
 
 
@@ -111,21 +115,8 @@ def build_1txd(writer_io, img, args):
     os.remove(destination_texture)
 
 
-def main():
-    # Parse the command line arguments
-    args = parser.parse_args()
-
-    # If temporary directory is not exists
-    # create the new ones
-    if not os.path.exists("temp"):
-        os.mkdir("temp")
-
-    # Getting the information from command line arguments
-    input_file = args.input
-    masked = args.masked
-    output_file = args.output if args.output else os.path.splitext(args.input)[
-        0] + ".tga.ckd"
-
+# Convert function
+def convert(input_file, output_file, args, masked):
     # Open the image using PIL library
     img = Image.open(input_file)
     w, h = img.size
@@ -168,10 +159,44 @@ def main():
     with open(output_file, "wb") as f:
         f.write(header_buf.getvalue() + contained_buf.getvalue())
 
+
+# Main function
+def main():
+    # Parse the command line arguments
+    args = parser.parse_args()
+
+    # If temporary directory is not exists
+    # create the new ones
+    if not os.path.exists("temp"):
+        os.mkdir("temp")
+
+    # Getting the information from command line arguments
+    input_files = glob(args.input)
+    masked = args.masked
+
+    # Converting the files
+    for input_file in input_files:
+        # Getting the output path
+        output_file = os.path.splitext(input_file)[0] + ".tga.ckd"
+        output_file = os.path.join(
+            args.output if args.output else '', output_file)
+
+        print(f"{input_file} --> {output_file}")
+
+        try:
+            convert(input_file, output_file, args, masked)
+        except Exception as e:
+            print(f"Exception occurred while converting {input_file}:")
+            print(e)
+
+            continue
+
     # If temporary directory is empty, we will remove it
     if len(os.listdir("temp")) == 0:
         os.rmdir("temp")
 
 
+# If current name of script is __main__,
+# program execute main function
 if __name__ == "__main__":
     main()

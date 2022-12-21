@@ -58,7 +58,7 @@ def build_apmc(writer_io, img, args):
     for source_texture in ["temp/alpha_source.png", "temp/mask_source.png"]:
         # Convert source texture to TEX format with CMPR encoding
         destination_texture = source_texture.split(".")[0] + ".tex"
-        os.system(f"{args.wimgt_executable_path} ENCODE \"{source_texture}\" --transform tex.cmpr --overwrite --dest \"temp/{destination_texture}\"")
+        os.system(f"{args.wimgt_executable_path} ENCODE \"{source_texture}\" --transform tex.cmpr --overwrite --dest \"{destination_texture}\"")
 
         # Opening the destination texture
         with open(destination_texture, "rb") as f:

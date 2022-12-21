@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Converted images
+*.tga.ckd
+*.png.ckd
+*.tga.ckd.bak
+*.png.ckd.bak

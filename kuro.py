@@ -53,23 +53,20 @@ def build_apmc(writer_io, img, args):
     mask_texture = mask_texture.convert("RGBA")
 
     safe_save(alpha_texture, "temp/alpha_source.png")
-    safe_save(alpha_texture, "temp/mask_source.png")
+    safe_save(mask_texture, "temp/mask_source.png")
 
     for source_texture in ["temp/alpha_source.png", "temp/mask_source.png"]:
         # Convert source texture to TEX format with CMPR encoding
         destination_texture = source_texture.split(".")[0] + ".tex"
-        os.system(f"{args.wimgt_executable_path} ENCODE \"{source_texture}\" --transform tex.cmpr --overwrite --dest \"{destination_texture}\"")
+        os.system(f"{args.wimgt_executable_path} ENCODE \"{source_texture}\" --transform tpl.cmpr --overwrite --strip --dest \"{destination_texture}\"")
 
         # Opening the destination texture
         with open(destination_texture, "rb") as f:
-            assert f.read(4) == b"TEX0"
+            assert f.read(4) == b"\0\x20\xaf\x30"
 
             # Getting the texture data size and read it
-            f.seek(0x14, os.SEEK_SET)
-            tex_size = struct.unpack(">I", f.read(4))[0]
-
             f.seek(0x40, os.SEEK_SET)
-            tex_data = f.read(tex_size)
+            tex_data = f.read()
 
             # Write the texture data to our passed writeable IO
             writer_io.write(tex_data)
@@ -94,19 +91,16 @@ def build_1txd(writer_io, img, args):
         b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x10\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0")
 
     # Convert source texture to TEX format with CMPR encoding
-    os.system(f"{args.wimgt_executable_path} ENCODE \"temp/source_texture.png\" --transform tex.cmpr --overwrite --dest \"temp/destination_texture.tex\"")
     destination_texture = "temp/destination_texture.tex"
+    os.system(f"{args.wimgt_executable_path} ENCODE \"{source_texture}\" --transform tpl.cmpr --overwrite --strip --dest \"{destination_texture}\"")
 
     # Opening the destination texture
     with open(destination_texture, "rb") as f:
-        assert f.read(4) == b"TEX0"
+        assert f.read(4) == b"\0\x20\xaf\x30"
 
         # Getting the texture data size and read it
-        f.seek(0x14, os.SEEK_SET)
-        tex_size = struct.unpack(">I", f.read(4))[0]
-
         f.seek(0x40, os.SEEK_SET)
-        tex_data = f.read(tex_size)
+        tex_data = f.read()
 
         # Write the texture data to our passed writeable IO
         writer_io.write(tex_data)
@@ -187,7 +181,7 @@ def main():
 
         if args.output:
             output_file = os.path.join(
-                args.output, os.path.basename(input_file))
+                args.output, os.path.basename(output_file))
 
         print(f"{input_file} --> {output_file}")
 

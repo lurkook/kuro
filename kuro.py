@@ -16,6 +16,8 @@ parser.add_argument("-m", "--masked", action="store_true",
                     help="Texture should be masked?")
 parser.add_argument("-e", "--extension-name", default="tga",
                     help="Name of extension what should be used for output file names (example. tga/png)")
+parser.add_argument("-W", "--white-alpha", action="store_true",
+                    help="Alpha texture should be re-masked to have white background? (This can be useful when texture gets artifacts)")
 
 
 # PIL saves PNGs with sRGB profile what makes Wiimm Image Tool crash
@@ -52,29 +54,49 @@ def build_apmc(writer_io, img, args):
     mask_texture = Image.frombytes("L", img.size, mask_texture)
     mask_texture = mask_texture.convert("RGBA")
 
-    safe_save(alpha_texture, "temp/alpha_source.png")
-    safe_save(mask_texture, "temp/mask_source.png")
+    # Creating the empty white image
+    source_size = (img.size[0], img.size[1] * 2)
+    source_texture = Image.new("RGB", source_size, (255, 255, 255))
 
-    for source_texture in ["temp/alpha_source.png", "temp/mask_source.png"]:
-        # Convert source texture to TEX format with CMPR encoding
-        destination_texture = source_texture.split(".")[0] + ".tex"
-        os.system(f"{args.wimgt_executable_path} ENCODE \"{source_texture}\" --transform tpl.cmpr --overwrite --strip --dest \"{destination_texture}\"")
+    if args.white_alpha:
+        # Creating the mask for alpha texture in source texture
+        # This is needed because some textures can have problems with black background
+        mask_for_alpha_texture = mask_texture.convert("L")
+        mask_for_alpha_texture = mask_for_alpha_texture.point(
+            lambda p: 255 if p > 1 else 0)
+        mask_for_alpha_texture = mask_for_alpha_texture.convert("1")
 
-        # Opening the destination texture
-        with open(destination_texture, "rb") as f:
-            assert f.read(4) == b"\0\x20\xaf\x30"
+        # Putting it together
+        source_texture.paste(alpha_texture, (0, 0), mask_for_alpha_texture)
+        source_texture.paste(mask_texture, (0, img.size[1]))
+    else:
+        # Putting it together
+        source_texture.paste(alpha_texture, (0, 0))
+        source_texture.paste(mask_texture, (0, img.size[1]))
 
-            # Getting the texture data size and read it
-            f.seek(0x40, os.SEEK_SET)
-            tex_data = f.read()
+    # Saving the input texture
+    safe_save(source_texture, "temp/input_source.png")
+    source_texture = "temp/input_source.png"
 
-            # Write the texture data to our passed writeable IO
-            writer_io.write(tex_data)
+    # Convert source texture to TEX format with CMPR encoding
+    destination_texture = "temp/destination_texture.tpl"
+    os.system(f"{args.wimgt_executable_path} COPY \"{source_texture}\" --transform tpl.cmpr --overwrite --strip --dest \"{destination_texture}\"")
 
-        # Remove source texture & destination texture
-        # from temporary directory
-        os.remove(source_texture)
-        os.remove(destination_texture)
+    # Opening the destination texture
+    with open(destination_texture, "rb") as f:
+        assert f.read(4) == b"\0\x20\xaf\x30"
+
+        # Getting the texture data size and read it
+        f.seek(0x40, os.SEEK_SET)
+        tex_data = f.read()
+
+        # Write the texture data to our passed writeable IO
+        writer_io.write(tex_data)
+
+    # Remove source texture & destination texture
+    # from temporary directory
+    # os.remove(source_texture)
+    # os.remove(destination_texture)
 
 
 # Function for building 1 Texture for not-masked textures
@@ -91,7 +113,7 @@ def build_1txd(writer_io, img, args):
         b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x10\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0")
 
     # Convert source texture to TEX format with CMPR encoding
-    destination_texture = "temp/destination_texture.tex"
+    destination_texture = "temp/destination_texture.tpl"
     os.system(f"{args.wimgt_executable_path} ENCODE \"{source_texture}\" --transform tpl.cmpr --overwrite --strip --dest \"{destination_texture}\"")
 
     # Opening the destination texture

@@ -133,3 +133,11 @@ dmypy.json
 *.png.ckd
 *.tga.ckd.bak
 *.png.ckd.bak
+
+# Input images
+*.png
+*.jpeg
+*.jpg
+
+# Temporary directory
+temp/

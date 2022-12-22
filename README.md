@@ -16,7 +16,9 @@ UbiArt texture encoder for Wii games.
 
 ### Usage
 ```
-kuro.py -i INPUT [-o OUTPUT] [-w WIMGT_EXECUTABLE_PATH] [-m] [-e EXTENSION_NAME]
+kuro.py -i INPUT [-o OUTPUT] [-w WIMGT_EXECUTABLE_PATH] [-m] [-e EXTENSION_NAME] [-W]
+
+UbiArt Wii texture encoder
 
 optional arguments:
   -i INPUT, --input INPUT
@@ -28,6 +30,8 @@ optional arguments:
   -m, --masked          Texture should be masked?
   -e EXTENSION_NAME, --extension-name EXTENSION_NAME
                         Name of extension what should be used for output file names (example. tga/png)
+  -W, --white-alpha     Alpha texture should be re-masked to have white background? (This can be useful when texture gets      
+                        artifacts)
 ```
 
 ### Contribute!

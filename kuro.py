@@ -95,8 +95,8 @@ def build_apmc(writer_io, img, args):
 
     # Remove source texture & destination texture
     # from temporary directory
-    # os.remove(source_texture)
-    # os.remove(destination_texture)
+    os.remove(source_texture)
+    os.remove(destination_texture)
 
 
 # Function for building 1 Texture for not-masked textures

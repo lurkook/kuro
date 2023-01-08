@@ -80,7 +80,7 @@ def build_apmc(writer_io, img, args):
 
     # Convert source texture to TEX format with CMPR encoding
     destination_texture = "temp/destination_texture.tpl"
-    os.system(f"{args.wimgt_executable_path} COPY \"{source_texture}\" --transform tpl.cmpr --overwrite --strip --dest \"{destination_texture}\"")
+    os.system(f"\"{args.wimgt_executable_path}\" COPY \"{source_texture}\" --transform tpl.cmpr --overwrite --strip --dest \"{destination_texture}\"")
 
     # Opening the destination texture
     with open(destination_texture, "rb") as f:
@@ -114,7 +114,7 @@ def build_1txd(writer_io, img, args):
 
     # Convert source texture to TEX format with CMPR encoding
     destination_texture = "temp/destination_texture.tpl"
-    os.system(f"{args.wimgt_executable_path} ENCODE \"{source_texture}\" --transform tpl.cmpr --overwrite --strip --dest \"{destination_texture}\"")
+    os.system(f"\"{args.wimgt_executable_path}\" ENCODE \"{source_texture}\" --transform tpl.cmpr --overwrite --strip --dest \"{destination_texture}\"")
 
     # Opening the destination texture
     with open(destination_texture, "rb") as f:
